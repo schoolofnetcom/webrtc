@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+<body>
+
+    <header>
+        <span id="id"></span>
+    </header>
+
+    <main class="login">
+        LOCAL STREAM
+        <video src="" id="local" autoplay></video>
+        <br>
+        <br>
+        PATTERN STREAM
+        <video src="" id="pattern" autoplay></video>
+        <br>
+        <br>
+        <input type="text" name="peer_id" id="peer_id">
+        <button type="button" id="login">Connect</button>
+        <button type="button" id="call">Call</button>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/0.3.14/peer.min.js"></script>
+
+    <script>
+        (function() {
+            var app = {
+                peers: []
+            }
+
+            app.checkRTC = function(cb) {
+                navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.oGetUserMedia;
+
+                if (!navigator.getUserMedia) {
+                    return cb({ err: 'RTC Failed ' }, false)
+                }
+
+
+                navigator.getUserMedia({ audio: true, video: true }, cb, function(err) {
+                    console.log('CheckRTC => ', err)
+                })
+            }
+
+            app.onRecieveStream = function(stream, name) {
+                var video = $('#' + name)[0]
+                video.src = window.URL.createObjectURL(stream)
+                window.peer_stream = stream
+            }
+
+            app.newPeer = function() {
+                $("#id").text(app.peer.id)
+            }
+
+            app.login = function() {
+                var peerID = $('#peer_id').val();
+
+                if (peerID) {
+                    app.peers.push(peerID)
+                    con = app.peer.connect(peerID)
+                    // con.on('data')
+                }
+            }
+
+            app.peerConnect = function(con) {
+                app.peer.peer_id = con.peer;
+                app.peer.con = con
+
+                console.log('A new connection')
+            }
+
+            app.call = function() {
+                var call  = app.peer.call(app.peer.peer_id, window.localStream)
+
+                call.on('stream', function(stream) {
+                    window.peer_stream = stream
+
+                    app.onRecieveStream(stream, 'pattern')
+                })
+            }
+
+            app.onReceiveCall = function(call) {
+                call.answer(window.localStream)
+                call.on('stream', function(stream) {
+                    window.peer_stream = stream
+                    app.onRecieveStream(stream, 'pattern')
+                })
+            }
+
+            app.peerCall = function(call) {
+                return app.onReceiveCall(call)
+            }
+
+
+            app.init = function() {
+                app.peer = new Peer({ key: 'xmj30v615pfd2t9', debug: 3 })
+
+                app.peer.on('open', app.newPeer)
+                app.peer.on('connection', app.peerConnect)
+                app.peer.on('call', app.peerCall)
+
+                app.checkRTC(function(stream) {
+                    window.localStream = stream
+
+                    app.onRecieveStream(stream, 'local')
+                })
+
+                $("#login").on('click', app.login)
+                $("#call").on('click', app.call)
+            }
+
+            app.init()
+        })();
+    </script>
+</body>
+</html>

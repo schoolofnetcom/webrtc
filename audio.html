@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+<body>
+
+    <audio id="local_audio" controls autoplay></audio>
+
+    <script>
+        navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.oGetUserMedia;
+
+        var audio = document.getElementById("local_audio")
+
+        if (navigator.getUserMedia) {
+            navigator.mediaDevices
+                     .getUserMedia({ audio: true })
+                     .then(handleAudio)
+                     .catch(handleAudioError)
+        }
+
+        function handleAudio(audioStream) {
+            var tracks = audioStream.getAudioTracks();
+
+            audio.srcObject = audioStream;
+        }
+
+
+        function handleAudioError(err) {
+            console.log(err)
+        }
+    </script>
+</body>
+</html>

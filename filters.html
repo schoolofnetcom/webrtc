@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+
+    <style>
+        .none {
+            filter:  none;
+        }
+        .sepia {
+            filter:  sepia(1);
+        }
+        .gray {
+            filter: grayscale(1)
+        }
+        .blur {
+            filter: blur(5px)
+        }
+    </style>
+</head>
+<body>
+    <button type="button">Click here for photo</button>
+    <select id="filter">
+        <option value="none">None</option>
+        <option value="sepia">Sepia</option>
+        <option value="gray">Gray</option>
+        <option value="blur">Blur</option>
+    </select>
+
+
+    <video id="video" autoplay></video>
+    <canvas id="canvas"></canvas>
+
+    <script>
+        navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.oGetUserMedia;
+
+        var video = document.getElementById("video")
+        var canvas = document.getElementById("canvas")
+        var button = document.querySelector("button")
+        var select = document.getElementById("filter")
+        canvas.width = 480
+        canvas.height = 360
+
+        select.onchange = function() {
+            console.log(select.value)
+            video.className = select.value
+            canvas.className = select.value
+        }
+
+        button.onclick = function() {
+            canvas.width = video.videoWidth
+            canvas.height = video.videoHeight
+
+            canvas
+                .getContext('2d')
+                .drawImage(video, 0, 0, canvas.width, canvas.height)
+
+        }
+
+
+        if (navigator.getUserMedia) {
+            navigator.mediaDevices
+                .getUserMedia({ video: true })
+                .then(handleStream)
+                .catch(handleStreamError)
+        }
+
+        function handleStream(stream) {
+            video.srcObject = stream
+        }
+
+        function handleStreamError() {
+
+        }
+    </script>
+</body>
+</html>

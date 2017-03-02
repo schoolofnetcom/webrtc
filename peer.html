@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+<body>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/0.3.14/peer.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var peer1 = new Peer({ key: 'xmj30v615pfd2t9' })
+            var peer2 = new Peer({ key: 'xmj30v615pfd2t9' })
+
+            var peerId1 = null;
+
+            peer1.on('open', function(peer_id) {
+                peerId1 = peer_id
+
+                var conPeer2 = peer2.connect(peerId1)
+
+                conPeer2.on('data', function(data) {
+                    conPeer2.send('THIS IS MY FIRST DATA')
+                    console.log(peer1, peer2)
+                })
+            })
+
+            peer1.on('connection', function(con) {
+                con.on('open', function() {
+                    con.send('anything')
+                })
+                con.on('data', function(data) {
+                    console.log('DATA => ', data)
+                })
+            })
+        })
+    </script>
+</body>
+</html>
